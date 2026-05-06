@@ -1,0 +1,79 @@
+.login-page {
+  height: 100vh;
+  overflow: hidden;
+  cursor: default;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  transition: background-color 0.4s ease, color 0.3s ease;
+}
+
+/* ── Two-column wrapper ──────────────────────── */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  flex-direction: row-reverse; /* hero on right, form on left (RTL) */
+}
+
+/* ── Login panel ─────────────────────────────── */
+.login-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0 28px;
+  position: relative;
+  z-index: 10;
+  background: var(--panel-bg);
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  border-left: 1px solid var(--glass-border);
+  box-shadow:
+    inset -1px 0 0 var(--border-light),
+    60px 0 120px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .login-section { width: 48%; }
+}
+
+/* Animated edge shimmer */
+.login-section::before {
+  content: '';
+  position: absolute;
+  top: 0; right: -1px; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--cyan-glow), transparent);
+  animation: edgeShimmer 4s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+/* ── Inner content box ───────────────────────── */
+.form-inner {
+  width: 100%;
+  max-width: 420px;
+  animation: panelReveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Section heading ─────────────────────────── */
+.heading-wrap {
+  text-align: right;
+  margin-bottom: 32px;
+  animation: fadeUp 0.7s 0.35s ease both;
+}
+.heading-wrap h2 {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.heading-wrap p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}

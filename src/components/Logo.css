@@ -1,0 +1,70 @@
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  animation: logoReveal 0.8s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Icon box */
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px var(--glass-border),
+    0 0 30px rgba(0, 102, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.logo-icon:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow:
+    0 0 0 1px var(--cyan-glow),
+    0 0 50px rgba(0, 194, 255, 0.3);
+}
+.logo-icon .material-symbols-outlined {
+  color: var(--cyan-glow);
+  font-size: 30px;
+}
+
+/* Spinning ring decoration */
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 22px;
+  border: 1px solid transparent;
+  border-top-color: var(--cyan-glow);
+  border-right-color: var(--cyan-glow);
+  opacity: 0.5;
+  animation: ringRotate 4s linear infinite;
+}
+
+/* Gradient text */
+.logo-title {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  background: linear-gradient(
+    90deg,
+    var(--text-primary) 0%,
+    var(--cyan-glow)    40%,
+    var(--blue-bright)  70%,
+    var(--text-primary) 100%
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleShimmer 5s linear infinite;
+}
