@@ -142,7 +142,7 @@ export default function App() {
       {currentPage === 'login' && (
         <LoginPage 
           onSuccess={handleLoginSuccess}
-          onSwitchToSignUp={() => navigateTo('signup')}
+          onSwitchToSignUp={() => navigateTo('dashboard')}
         />
       )}
 
