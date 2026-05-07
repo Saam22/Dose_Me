@@ -54,8 +54,6 @@ export default function LoginPage({ onSuccess }) {
       {/* Animated canvas behind everything */}
       <Background />
 
-      {/* Floating theme toggle (top-left in LTR coords) */}
-      <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
 
       {/* Two-column layout */}
       <div className="page-wrapper">
