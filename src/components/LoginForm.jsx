@@ -7,7 +7,7 @@ import './LoginForm.css';
  *   onSuccess {function(email)} – called after a successful login simulation
  *   showToast {function(msg, type?, duration?)} – from useToast hook
  */
-export default function LoginForm({ onSuccess, showToast }) {
+export default function LoginForm({ onSuccess, showToast, onSignUpClick }) {
   /* ── State ─────────────────────────────────── */
   const [email,      setEmail]      = useState('');
   const [password,   setPassword]   = useState('');
@@ -211,11 +211,9 @@ export default function LoginForm({ onSuccess, showToast }) {
           <button
             type="button"
             className="text-link"
-            onClick={() =>
-              showToast('يرجى التواصل مع admin@doseme.health', '', 5000)
-            }
+            onClick={() => onSignUpClick?.()}
           >
-            تواصل مع الإدارة لإنشاء حساب
+            إنشاء حساب جديد
           </button>
         </p>
       </div>

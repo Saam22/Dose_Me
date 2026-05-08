@@ -16,7 +16,7 @@ import { useToast }  from '../hooks/useToast';
  * Top-level page that wires state (theme, toast) and passes
  * callbacks down into the child components.
  */
-export default function LoginPage({ onSuccess }) {
+export default function LoginPage({ onSuccess, onSignUpClick }) {
   /* ── Theme ─────────────────────────────────── */
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('doseme-theme') === 'dark'; }
@@ -54,6 +54,8 @@ export default function LoginPage({ onSuccess }) {
       {/* Animated canvas behind everything */}
       <Background />
 
+      {/* Floating theme toggle (top-left in LTR coords) */}
+      <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
 
       {/* Two-column layout */}
       <div className="page-wrapper">
@@ -73,6 +75,7 @@ export default function LoginPage({ onSuccess }) {
             <LoginForm
               onSuccess={handleLoginSuccess}
               showToast={showToast}
+              onSignUpClick={onSignUpClick}
             />
           </div>
         </section>

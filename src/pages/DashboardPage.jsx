@@ -147,7 +147,7 @@ function WeekBar({ data }) {
   );
 }
 
-export default function DashboardPage({ userEmail = '', onLogout }) {
+export default function DashboardPage({ userEmail = '', userFullName = '', onLogout, onProfileClick }) {
   const [tasks, setTasks] = useState(TASKS);
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('doseme-theme') === 'dark'; }
@@ -161,14 +161,14 @@ export default function DashboardPage({ userEmail = '', onLogout }) {
     catch {}
   }, [isDark]);
 
-  const getDisplayName = (email) => {
-    const raw = (email || '').trim();
-    if (!raw) return 'المستخدم';
-    const part = raw.split('@')[0] || raw;
-    return part.charAt(0).toUpperCase() + part.slice(1);
-  };
-
-  const displayName = getDisplayName(userEmail);
+  const displayName = userFullName
+    ? userFullName.split(' ')[0]
+    : (() => {
+        const raw = (userEmail || '').trim();
+        if (!raw) return 'المستخدم';
+        const part = raw.split('@')[0] || raw;
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })();
   const doneTasks = tasks.filter(t => t.actionType === 'done').length;
   const progress = Math.round((doneTasks / tasks.length) * 100);
 
@@ -228,7 +228,7 @@ export default function DashboardPage({ userEmail = '', onLogout }) {
             <span className="material-symbols-outlined">notifications</span>
             <span className="dash-nav__notif-dot" />
           </button>
-          <button className="dash-nav__avatar" onClick={onLogout} title="تسجيل الخروج">
+          <button className="dash-nav__avatar" onClick={onProfileClick} title="الملف الشخصي">
             <span className="dash-nav__avatar-initials">
               {displayName.charAt(0).toUpperCase()}
             </span>

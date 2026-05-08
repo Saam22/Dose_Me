@@ -1,406 +1,205 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/theme.css';
 import './ProfilePage.css';
 
-import Background from '../components/Background';
-import ThemeToggle from '../components/ThemeToggle';
-import Toast from '../components/Toast';
-import { useToast } from '../hooks/useToast';
+const CHRONIC_LABELS = {
+  diabetes: { label: 'السكري (النوع 2)',   icon: 'glucose',     color: 'red' },
+  bp:       { label: 'ارتفاع ضغط الدم',   icon: 'vital_signs', color: 'orange' },
+  heart:    { label: 'أمراض القلب',        icon: 'cardiology',  color: 'red' },
+  asthma:   { label: 'الربو',              icon: 'pulmonology', color: 'blue' },
+  allergy:  { label: 'حساسية البنسلين',   icon: 'medication',  color: 'amber' },
+  kidney:   { label: 'الفشل الكلوي',       icon: 'nephrology',  color: 'purple' },
+};
 
-/**
- * ProfilePage - الملف الشخصي للمريض
- */
-export default function ProfilePage({ userData }) {
-  const [isDark, setIsDark] = useState(() => {
-    try { return localStorage.getItem('doseme-theme') === 'dark'; }
-    catch { return false; }
-  });
+const MEDS = [
+  { name: 'ميتفورمين', dose: '٥٠٠ مجم', freq: 'مرتين يومياً', icon: 'medication', color: 'blue' },
+  { name: 'أملوديبين', dose: '٥ مجم',   freq: 'مرة يومياً',   icon: 'pill',       color: 'teal' },
+  { name: 'أسبرين',    dose: '٧٥ مجم',  freq: 'مرة يومياً',   icon: 'medication', color: 'green' },
+];
 
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState(userData || {});
-  
-  const { toast, showToast } = useToast();
+function InfoRow({ icon, label, value, color = 'blue' }) {
+  return (
+    <div className="info-row">
+      <div className={`info-row__icon info-row__icon--${color}`}>
+        <span className="material-symbols-outlined">{icon}</span>
+      </div>
+      <div className="info-row__text">
+        <span className="info-row__label">{label}</span>
+        <span className="info-row__value">{value || '—'}</span>
+      </div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    // Load from localStorage if no userData passed
-    if (!userData) {
-      const saved = localStorage.getItem('doseme-user');
-      if (saved) setProfileData(JSON.parse(saved));
-    } else {
-      setProfileData(userData);
-    }
-  }, [userData]);
+function Section({ icon, title, color = 'blue', children, collapsible = false }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="profile-section">
+      <div
+        className="profile-section__header"
+        onClick={() => collapsible && setOpen(o => !o)}
+        style={{ cursor: collapsible ? 'pointer' : 'default' }}
+      >
+        <div className={`profile-section__icon profile-section__icon--${color}`}>
+          <span className="material-symbols-outlined">{icon}</span>
+        </div>
+        <span className="profile-section__title">{title}</span>
+        {collapsible && (
+          <span className={`profile-section__chevron material-symbols-outlined ${open ? 'open' : ''}`}>
+            expand_more
+          </span>
+        )}
+      </div>
+      {(!collapsible || open) && <div className="profile-section__body">{children}</div>}
+    </div>
+  );
+}
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    try { localStorage.setItem('doseme-theme', isDark ? 'dark' : 'light'); }
-    catch { /* storage unavailable */ }
-  }, [isDark]);
+export default function ProfilePage({ user = {}, onBack, onLogout, isDark, onThemeToggle }) {
+  const fullName  = user.fullName  || 'المستخدم';
+  const email     = user.email     || '';
+  const phone     = user.phone     || '';
+  const age       = user.age       || '';
+  const gender    = user.gender    || '';
+  const height    = user.height    || '';
+  const weight    = user.weight    || '';
+  const bloodType = user.bloodType || '';
+  const chronic   = user.chronic   || [];
 
-  const toggleTheme = () => setIsDark(d => !d);
+  const bmi = height && weight
+    ? (Number(weight) / Math.pow(Number(height) / 100, 2)).toFixed(1) : '—';
+  const bmiStatus = bmi !== '—'
+    ? Number(bmi) < 18.5 ? 'نحيف' : Number(bmi) < 25 ? 'طبيعي' : Number(bmi) < 30 ? 'زيادة وزن' : 'سمنة'
+    : '';
 
-  const handleSave = () => {
-    localStorage.setItem('doseme-user', JSON.stringify(profileData));
-    setIsEditing(false);
-    showToast('تم حفظ التغييرات بنجاح ✓', 'success');
-  };
-
-  const calculateBMI = () => {
-    if (!profileData.weight || !profileData.height) return null;
-    const heightInMeters = profileData.height / 100;
-    return (profileData.weight / (heightInMeters * heightInMeters)).toFixed(1);
-  };
-
-  const getBMIStatus = (bmi) => {
-    if (!bmi) return '';
-    if (bmi < 18.5) return { text: 'نقص وزن', color: 'warning' };
-    if (bmi < 25) return { text: 'طبيعي', color: 'success' };
-    if (bmi < 30) return { text: 'زيادة وزن', color: 'warning' };
-    return { text: 'سمنة', color: 'error' };
-  };
-
-  const bmi = calculateBMI();
-  const bmiStatus = getBMIStatus(bmi);
+  const userId = 'DM-' + Math.floor(100000 + Math.random() * 800000);
 
   return (
     <div className="profile-page" dir="rtl">
-      <Background />
-      <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+      {/* ── Top bar ────────────────────── */}
+      <div className="profile-topbar">
+        <button className="profile-back" onClick={onBack} aria-label="رجوع">
+          <span className="material-symbols-outlined">arrow_forward_ios</span>
+        </button>
+        <span className="profile-topbar__title">الملف الشخصي</span>
+        <div className="profile-topbar__actions">
+          <button className="profile-icon-btn" onClick={onThemeToggle} aria-label="تبديل الثيم">
+            <span className="material-symbols-outlined">{isDark ? 'light_mode' : 'dark_mode'}</span>
+          </button>
+          <button className="profile-icon-btn" aria-label="الإشعارات">
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+          <button className="profile-icon-btn" aria-label="الإعدادات">
+            <span className="material-symbols-outlined">settings</span>
+          </button>
+        </div>
+      </div>
 
-      <div className="profile-container">
-        {/* Header */}
-        <header className="profile-header">
-          <div className="header-content">
-            <div className="user-avatar">
-              <img 
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || 'User')}&background=0066ff&color=fff&size=128`}
-                alt={profileData.fullName}
-              />
-              <button className="edit-avatar" onClick={() => setIsEditing(true)}>
-                <span className="material-symbols-outlined">edit</span>
-              </button>
+      <div className="profile-scroll">
+        {/* ── Hero card ──────────────────── */}
+        <div className="profile-hero">
+          <div className="profile-avatar">
+            <span className="profile-avatar__letter">{fullName.charAt(0)}</span>
+            <button className="profile-avatar__edit" aria-label="تعديل الصورة">
+              <span className="material-symbols-outlined">edit</span>
+            </button>
+          </div>
+          <h2 className="profile-name">{fullName}</h2>
+          <p className="profile-uid">المعرف الرقمي: #{userId}</p>
+
+          {/* Quick stats */}
+          <div className="profile-quick-stats">
+            <div className="pqs-item">
+              <span className="material-symbols-outlined">calendar_today</span>
+              <div className="pqs-val">{age || '—'}</div>
+              <div className="pqs-lbl">العمر</div>
             </div>
-            <div className="user-info">
-              <h1>{profileData.fullName}</h1>
-              <p className="user-id">DM-{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
-              <div className="user-stats">
-                <div className="stat-item">
-                  <span className="material-symbols-outlined">calendar_today</span>
-                  <span>{profileData.age} سنة</span>
-                </div>
-                <div className="stat-item">
-                  <span className="material-symbols-outlined">bloodtype</span>
-                  <span>{profileData.bloodType}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="material-symbols-outlined">monitor_weight</span>
-                  <span>{profileData.weight} كجم</span>
-                </div>
-              </div>
+            <div className="pqs-divider" />
+            <div className="pqs-item">
+              <span className="material-symbols-outlined">water_drop</span>
+              <div className="pqs-val pqs-val--red">{bloodType || '—'}</div>
+              <div className="pqs-lbl">الفصيلة</div>
+            </div>
+            <div className="pqs-divider" />
+            <div className="pqs-item">
+              <span className="material-symbols-outlined">monitor_weight</span>
+              <div className="pqs-val">{weight ? `${weight} كجم` : '—'}</div>
+              <div className="pqs-lbl">الوزن</div>
             </div>
           </div>
-          
-          <button className="btn-edit-profile" onClick={() => setIsEditing(!isEditing)}>
-            <span className="material-symbols-outlined">{isEditing ? 'close' : 'edit'}</span>
-            <span>{isEditing ? 'إلغاء' : 'تعديل الملف'}</span>
-          </button>
-        </header>
+        </div>
 
-        {/* Navigation Tabs */}
-        <nav className="profile-tabs">
-          <button 
-            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            <span>نظرة عامة</span>
-          </button>
-          <button 
-            className={`tab ${activeTab === 'medical' ? 'active' : ''}`}
-            onClick={() => setActiveTab('medical')}
-          >
-            <span className="material-symbols-outlined">medical_services</span>
-            <span>المعلومات الطبية</span>
-          </button>
-          <button 
-            className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => setActiveTab('activity')}
-          >
-            <span className="material-symbols-outlined">activity</span>
-            <span>النشاط</span>
-          </button>
-          <button 
-            className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            <span className="material-symbols-outlined">settings</span>
-            <span>الإعدادات</span>
-          </button>
-        </nav>
-
-        {/* Content */}
-        <main className="profile-content">
-          {activeTab === 'overview' && (
-            <div className="tab-content fade-in">
-              {/* Health Metrics */}
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <div className="metric-icon bmi">
-                    <span className="material-symbols-outlined">monitor_heart</span>
-                  </div>
-                  <div className="metric-info">
-                    <span className="metric-label">مؤشر كتلة الجسم</span>
-                    <span className={`metric-value ${bmiStatus?.color}`}>{bmi}</span>
-                    <span className="metric-status">{bmiStatus?.text}</span>
-                  </div>
-                </div>
-
-                <div className="metric-card">
-                  <div className="metric-icon weight">
-                    <span className="material-symbols-outlined">monitor_weight</span>
-                  </div>
-                  <div className="metric-info">
-                    <span className="metric-label">الوزن</span>
-                    <span className="metric-value">{profileData.weight} كجم</span>
-                    <span className="metric-status">طبيعي</span>
-                  </div>
-                </div>
-
-                <div className="metric-card">
-                  <div className="metric-icon height">
-                    <span className="material-symbols-outlined">height</span>
-                  </div>
-                  <div className="metric-info">
-                    <span className="metric-label">الطول</span>
-                    <span className="metric-value">{profileData.height} سم</span>
-                    <span className="metric-status">ثابت</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Info */}
-              <div className="info-section">
-                <h3>
-                  <span className="material-symbols-outlined">info</span>
-                  المعلومات الأساسية
-                </h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="material-symbols-outlined">email</span>
-                    <div>
-                      <strong>البريد الإلكتروني</strong>
-                      <p>{profileData.email}</p>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <span className="material-symbols-outlined">phone</span>
-                    <div>
-                      <strong>رقم الهاتف</strong>
-                      <p>{profileData.phone}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chronic Diseases */}
-              {profileData.chronicDiseases?.length > 0 && (
-                <div className="info-section">
-                  <h3>
-                    <span className="material-symbols-outlined">warning</span>
-                    الأمراض المزمنة
-                  </h3>
-                  <div className="tags-list">
-                    {profileData.chronicDiseases.map(disease => (
-                      <span key={disease} className="tag warning">
-                        <span className="material-symbols-outlined">local_hospital</span>
-                        {disease}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* ── BMI card ───────────────────── */}
+        {bmi !== '—' && (
+          <div className="bmi-card">
+            <div className="bmi-card__left">
+              <div className="bmi-card__val">{bmi}</div>
+              <div className="bmi-card__label">مؤشر كتلة الجسم (BMI)</div>
+              <div className={`bmi-card__status ${Number(bmi) < 25 ? 'ok' : 'warn'}`}>{bmiStatus}</div>
             </div>
-          )}
-
-          {activeTab === 'medical' && (
-            <div className="tab-content fade-in">
-              <div className="medical-info">
-                <h3>
-                  <span className="material-symbols-outlined">medical_services</span>
-                  التفاصيل الطبية
-                </h3>
-                
-                <div className="medical-grid">
-                  <div className="medical-card">
-                    <h4>فصيلة الدم</h4>
-                    <div className="blood-type-display">
-                      <span className="material-symbols-outlined">bloodtype</span>
-                      <span className="blood-type">{profileData.bloodType}</span>
-                    </div>
-                  </div>
-
-                  <div className="medical-card">
-                    <h4>الأدوية النشطة</h4>
-                    <div className="medications-list">
-                      {profileData.medications?.length > 0 ? (
-                        profileData.medications.map((med, idx) => (
-                          <div key={idx} className="medication-item">
-                            <span className="material-symbols-outlined">medication</span>
-                            <span>{med}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="no-data">لا توجد أدوية مسجلة</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="medical-card full-width">
-                    <h4>الحساسيات</h4>
-                    <div className="allergies-list">
-                      {profileData.allergies?.length > 0 ? (
-                        profileData.allergies.map((allergy, idx) => (
-                          <span key={idx} className="tag danger">
-                            <span className="material-symbols-outlined">warning</span>
-                            {allergy}
-                          </span>
-                        ))
-                      ) : (
-                        <p className="no-data">لا توجد حساسيات مسجلة</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            <div className="bmi-card__bar">
+              <div className="bmi-track">
+                <div className="bmi-fill" style={{ width: `${Math.min((Number(bmi) / 40) * 100, 100)}%` }} />
+                <div className="bmi-pointer" style={{ left: `${Math.min((Number(bmi) / 40) * 100, 100)}%` }} />
               </div>
-            </div>
-          )}
-
-          {activeTab === 'activity' && (
-            <div className="tab-content fade-in">
-              <div className="activity-section">
-                <h3>
-                  <span className="material-symbols-outlined">timeline</span>
-                  النشاط الأخير
-                </h3>
-                <div className="timeline">
-                  <div className="timeline-item">
-                    <div className="timeline-dot" />
-                    <div className="timeline-content">
-                      <strong>تم إنشاء الحساب</strong>
-                      <p>مرحباً بك في DoseMe</p>
-                      <span className="time">الآن</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'settings' && (
-            <div className="tab-content fade-in">
-              <div className="settings-section">
-                <h3>
-                  <span className="material-symbols-outlined">settings</span>
-                  الإعدادات
-                </h3>
-                
-                <div className="settings-list">
-                  <div className="setting-item">
-                    <div className="setting-info">
-                      <span className="material-symbols-outlined">notifications</span>
-                      <div>
-                        <strong>الإشعارات</strong>
-                        <p>تفعيل إشعارات التطبيقات</p>
-                      </div>
-                    </div>
-                    <label className="switch">
-                      <input type="checkbox" defaultChecked />
-                      <span className="slider" />
-                    </label>
-                  </div>
-
-                  <div className="setting-item">
-                    <div className="setting-info">
-                      <span className="material-symbols-outlined">dark_mode</span>
-                      <div>
-                        <strong>الوضع الداكن</strong>
-                        <p>تفعيل الوضع الداكن</p>
-                      </div>
-                    </div>
-                    <label className="switch">
-                      <input 
-                        type="checkbox" 
-                        checked={isDark}
-                        onChange={toggleTheme}
-                      />
-                      <span className="slider" />
-                    </label>
-                  </div>
-
-                  <div className="setting-item danger">
-                    <div className="setting-info">
-                      <span className="material-symbols-outlined">delete</span>
-                      <div>
-                        <strong>حذف الحساب</strong>
-                        <p>حذف حسابك نهائياً</p>
-                      </div>
-                    </div>
-                    <button className="btn-danger">حذف</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
-
-        {/* Edit Modal */}
-        {isEditing && (
-          <div className="modal-overlay" onClick={() => setIsEditing(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h3>تعديل المعلومات</h3>
-              
-              <div className="form-group">
-                <label>الاسم الكامل</label>
-                <input
-                  type="text"
-                  value={profileData.fullName}
-                  onChange={e => setProfileData({...profileData, fullName: e.target.value})}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>البريد الإلكتروني</label>
-                <input
-                  type="email"
-                  value={profileData.email}
-                  onChange={e => setProfileData({...profileData, email: e.target.value})}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>رقم الهاتف</label>
-                <input
-                  type="tel"
-                  value={profileData.phone}
-                  onChange={e => setProfileData({...profileData, phone: e.target.value})}
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button className="btn-secondary" onClick={() => setIsEditing(false)}>
-                  إلغاء
-                </button>
-                <button className="btn-primary" onClick={handleSave}>
-                  حفظ التغييرات
-                </button>
+              <div className="bmi-labels">
+                <span>نحيف</span><span>طبيعي</span><span>زيادة</span><span>سمنة</span>
               </div>
             </div>
           </div>
         )}
-      </div>
 
-      <Toast msg={toast.msg} type={toast.type} visible={toast.visible} />
+        {/* ── Personal info ──────────────── */}
+        <Section icon="person" title="المعلومات الشخصية" color="blue" collapsible>
+          <InfoRow icon="badge"           label="الاسم الكامل"       value={fullName}            color="blue" />
+          <InfoRow icon="mail"            label="البريد الإلكتروني"  value={email}               color="teal" />
+          <InfoRow icon="smartphone"      label="رقم الهاتف"         value={phone}               color="green" />
+          <InfoRow icon="wc"              label="الجنس"              value={gender}              color="purple" />
+          <InfoRow icon="straighten"      label="الطول"              value={height ? `${height} سم` : ''} color="blue" />
+        </Section>
+
+        {/* ── Medical info ───────────────── */}
+        <Section icon="health_and_safety" title="المعلومات الطبية" color="red" collapsible>
+          <InfoRow icon="water_drop"      label="فصيلة الدم"         value={bloodType}           color="red" />
+          <InfoRow icon="monitor_weight"  label="الوزن"              value={weight ? `${weight} كجم` : ''} color="blue" />
+          <InfoRow icon="height"          label="الطول"              value={height ? `${height} سم` : ''} color="teal" />
+          {chronic.length > 0 && (
+            <div className="chronic-tags">
+              {chronic.map(id => {
+                const c = CHRONIC_LABELS[id];
+                if (!c) return null;
+                return (
+                  <span key={id} className={`chronic-tag chronic-tag--${c.color}`}>
+                    <span className="material-symbols-outlined">{c.icon}</span>
+                    {c.label}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
+        {/* ── Active medications ─────────── */}
+        <Section icon="medication" title="الأدوية التنشطة" color="teal" collapsible>
+          {MEDS.map(med => (
+            <div key={med.name} className={`med-row med-row--${med.color}`}>
+              <div className="med-row__icon">
+                <span className="material-symbols-outlined">{med.icon}</span>
+              </div>
+              <div className="med-row__info">
+                <span className="med-row__name">{med.name}</span>
+                <span className="med-row__detail">{med.dose} • {med.freq}</span>
+              </div>
+              <span className="med-row__arrow material-symbols-outlined">chevron_left</span>
+            </div>
+          ))}
+        </Section>
+
+        {/* ── Logout ─────────────────────── */}
+        <button className="profile-logout" onClick={onLogout}>
+          <span className="material-symbols-outlined">logout</span>
+          تسجيل الخروج
+        </button>
+      </div>
     </div>
   );
 }
