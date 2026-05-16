@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import LoginPage     from './pages/LoginPage';
 import SignUpPage    from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
-<<<<<<< HEAD
 import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordFlow from './pages/Forgotpasswordflow';
-=======
-import ProfilePage   from './pages/ProfilePage';
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
 
 /**
  * App
@@ -38,7 +34,6 @@ export default function App() {
     setUser(profileData);
     setScreen('dashboard');
   };
-<<<<<<< HEAD
   if (screen === 'forgot-password') {
     return (
       <ForgotPasswordFlow
@@ -46,9 +41,6 @@ export default function App() {
       />
     );
   }
-=======
-
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
   /* ── Logout ────────────────────────────────── */
   const handleLogout = () => {
     setUser(null);
@@ -91,10 +83,7 @@ export default function App() {
     <LoginPage
       onSuccess={handleLogin}
       onSignUpClick={() => setScreen('signup')}
-<<<<<<< HEAD
       onForgotPassword={() => setScreen('forgot-password')}
-=======
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
     />
   );
 }

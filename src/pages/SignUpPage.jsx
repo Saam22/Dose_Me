@@ -4,7 +4,6 @@ import ThemeToggle from '../components/ThemeToggle';
 import Toast from '../components/Toast';
 import { useToast } from '../hooks/useToast';
 import './SignUpPage.css';
-<<<<<<< HEAD
 // في أعلى الملف بعد import
 // ── حفظ المستخدم في localStorage ──
 
@@ -38,9 +37,6 @@ function saveUser(email, password, userData) {
     return false;
   }
 }
-=======
-
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const CHRONIC = [
   { id: 'diabetes', label: 'السكري (النوع 2)', icon: 'glucose' },
@@ -257,13 +253,10 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
     if (step === 0) {
       if (!formData.fullName.trim()) { showToast('الرجاء إدخال الاسم الكامل', 'error'); return false; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) { showToast('بريد إلكتروني غير صحيح', 'error'); return false; }
-<<<<<<< HEAD
       if (checkUserExists(formData.email)) {
         showToast('هذا البريد مسجل مسبقاً. يرجى تسجيل الدخول', 'error');
         return false;
       }
-=======
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
       if (formData.password.length < 6) { showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error'); return false; }
       if (!formData.terms) { showToast('الرجاء الموافقة على الشروط والأحكام', 'error'); return false; }
     }
@@ -276,7 +269,6 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
 
   const handleNext = () => {
     if (!validate()) return;
-<<<<<<< HEAD
 
     if (step < 2) {
       setStep(s => s + 1);
@@ -295,12 +287,6 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
       showToast('حدث خطأ في حفظ البيانات', 'error');
     }
   };
-=======
-    if (step < 2) { setStep(s => s + 1); return; }
-    onSuccess?.({ ...formData });
-  };
-
->>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
   const LABELS = ['إنشاء الحساب', 'البيانات الصحية', 'إنهاء الإعداد'];
   const BTNS   = ['إنشاء الحساب', 'إكمال الملف الشخصي', 'ابدأ الآن'];
 
