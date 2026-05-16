@@ -1,0 +1,106 @@
+/* =============================================
+   GOOGLE FONTS & MATERIAL SYMBOLS
+============================================= */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+/* =============================================
+   RESET
+============================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { height: 100%; font-family: 'IBM Plex Sans Arabic', sans-serif; }
+
+/* =============================================
+   LIGHT MODE (default)
+============================================= */
+:root {
+  --bg-void:          #f0f4f8;
+  --bg-deep:          #e2e8f0;
+  --bg-mid:           #cbd5e1;
+  --blue-core:        #0066ff;
+  --blue-bright:      #3d9bff;
+  --cyan-glow:        #0099cc;
+  --teal-soft:        #008b74;
+  --glass-fill:       rgba(0,0,0,0.03);
+  --glass-border:     rgba(0,0,0,0.08);
+  --glass-hover:      rgba(0,0,0,0.05);
+  --glass-strong:     rgba(0,0,0,0.06);
+  --text-primary:     #1a2c3e;
+  --text-secondary:   #2c3e50;
+  --text-muted:       #5a6e7c;
+  --error:            #dc2626;
+  --success:          #059669;
+  --input-bg:         rgba(255,255,255,0.9);
+  --input-border:     rgba(0,0,0,0.15);
+  --input-focus:      rgba(0,153,204,0.2);
+  --panel-bg:         rgba(255,255,255,0.85);
+  --border-light:     rgba(0,0,0,0.08);
+  --shadow-sm:        0 4px 20px rgba(0,0,0,0.05);
+  --hero-overlay:     linear-gradient(160deg, #e8f0fe 0%, #dbeafe 40%, #e0f2fe 100%);
+  --hero-img-opacity: 0;
+}
+
+/* =============================================
+   DARK MODE
+============================================= */
+[data-theme="dark"] {
+  --bg-void:          #04070f;
+  --bg-deep:          #060c1a;
+  --bg-mid:           #091326;
+  --blue-core:        #0066ff;
+  --blue-bright:      #3d9bff;
+  --cyan-glow:        #00c2ff;
+  --teal-soft:        #00e5c8;
+  --glass-fill:       rgba(255,255,255,0.045);
+  --glass-border:     rgba(255,255,255,0.10);
+  --glass-hover:      rgba(255,255,255,0.07);
+  --glass-strong:     rgba(255,255,255,0.09);
+  --text-primary:     rgba(255,255,255,0.95);
+  --text-secondary:   rgba(255,255,255,0.55);
+  --text-muted:       rgba(255,255,255,0.30);
+  --error:            #ff4d6a;
+  --success:          #00e5a0;
+  --input-bg:         rgba(255,255,255,0.05);
+  --input-border:     rgba(255,255,255,0.10);
+  --input-focus:      rgba(0,194,255,0.35);
+  --panel-bg:         rgba(6,12,26,0.7);
+  --border-light:     rgba(255,255,255,0.06);
+  --shadow-sm:        0 4px 20px rgba(0,0,0,0.3);
+  --hero-overlay:     linear-gradient(135deg, #02060f 0%, #040c1e 50%, #061428 100%);
+  --hero-img-opacity: 0.15;
+}
+
+/* =============================================
+   GLOBAL ANIMATIONS
+============================================= */
+@keyframes orbDrift1 {
+  0%,100% { transform:translate(0,0) scale(1); }
+  33%     { transform:translate(-60px,80px) scale(1.1); }
+  66%     { transform:translate(40px,-40px) scale(0.95); }
+}
+@keyframes orbDrift2 {
+  0%,100% { transform:translate(0,0) scale(1); }
+  40%     { transform:translate(80px,-60px) scale(1.15); }
+  70%     { transform:translate(-30px,40px) scale(0.9); }
+}
+@keyframes orbDrift3 {
+  0%,100% { transform:translate(0,0) scale(1); }
+  50%     { transform:translate(-80px,-80px) scale(1.2); }
+}
+@keyframes edgeShimmer {
+  0%,100% { opacity:0.2; top:0; height:40%; }
+  50%     { opacity:0.8; top:30%; height:40%; }
+}
+@keyframes ringRotate  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes titleShimmer{ from{background-position:200% center} to{background-position:-200% center} }
+@keyframes panelReveal { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+@keyframes logoReveal  { from{opacity:0;transform:scale(0.5) translateY(-20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes heroReveal  { from{opacity:0;transform:translateX(-50px)} to{opacity:1;transform:translateX(0)} }
+@keyframes fadeUp      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin        { to{transform:rotate(360deg)} }
+@keyframes checkPop    { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes rippleOut   { to{transform:scale(1);opacity:0} }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}   60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+}
