@@ -10,11 +10,16 @@ import LoginForm     from '../components/LoginForm';
 import HeroSection   from '../components/HeroSection';
 import Toast         from '../components/Toast';
 import { useToast }  from '../hooks/useToast';
+<<<<<<< HEAD
+=======
+
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
 /**
  * LoginPage
  * Top-level page that wires state (theme, toast) and passes
  * callbacks down into the child components.
  */
+<<<<<<< HEAD
 // في LoginForm.js أو حيث يتم التحقق من تسجيل الدخول
 // في أعلى الملف أو داخل المكون
 
@@ -38,6 +43,9 @@ import { useToast }  from '../hooks/useToast';
 //   }
 // }
 export default function LoginPage({ onSuccess, onSignUpClick ,onForgotPassword }) {
+=======
+export default function LoginPage({ onSuccess, onSignUpClick }) {
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
   /* ── Theme ─────────────────────────────────── */
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('doseme-theme') === 'dark'; }
@@ -97,7 +105,10 @@ export default function LoginPage({ onSuccess, onSignUpClick ,onForgotPassword }
               onSuccess={handleLoginSuccess}
               showToast={showToast}
               onSignUpClick={onSignUpClick}
+<<<<<<< HEAD
               onForgotPassword={onForgotPassword}
+=======
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
             />
           </div>
         </section>

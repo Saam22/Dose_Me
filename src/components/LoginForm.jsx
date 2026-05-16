@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import './LoginForm.css';
 
 /**
+<<<<<<< HEAD
  * ── دالة التحقق من بيانات المستخدم ──
  */
 function validateLoginCredentials(email, password) {
@@ -39,12 +40,32 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
   const [emailError, setEmailError] = useState(false);
   const [passError, setPassError] = useState(false);
   const [btnState, setBtnState] = useState('idle'); // 'idle' | 'loading' | 'success'
+=======
+ * LoginForm
+ * Props:
+ *   onSuccess {function(email)} – called after a successful login simulation
+ *   showToast {function(msg, type?, duration?)} – from useToast hook
+ */
+export default function LoginForm({ onSuccess, showToast, onSignUpClick }) {
+  /* ── State ─────────────────────────────────── */
+  const [email,      setEmail]      = useState('');
+  const [password,   setPassword]   = useState('');
+  const [pwVisible,  setPwVisible]  = useState(false);
+  const [remember,   setRemember]   = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passError,  setPassError]  = useState(false);
+  const [btnState,   setBtnState]   = useState('idle'); // 'idle' | 'loading' | 'success'
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
 
   const btnRef = useRef(null);
 
   /* ── Validation helpers ────────────────────── */
   const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+<<<<<<< HEAD
   const validatePass = (v) => v.length >= 6;
+=======
+  const validatePass  = (v) => v.length >= 6;
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
 
   /* ── Input handlers ────────────────────────── */
   const handleEmailChange = (e) => {
@@ -65,7 +86,10 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
   /* ── Submit ────────────────────────────────── */
   const handleSubmit = async (e) => {
     e.preventDefault();
+<<<<<<< HEAD
 
+=======
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
     const eOk = validateEmail(email);
     const pOk = validatePass(password);
     setEmailError(!eOk);
@@ -77,6 +101,7 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
     }
 
     setBtnState('loading');
+<<<<<<< HEAD
 
     // ✅ محاكاة تأخير الشبكة
     await new Promise((r) => setTimeout(r, 1500));
@@ -100,20 +125,39 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
       onSuccess?.(email, result.user);
       setBtnState('idle');
     }, 1500);
+=======
+    await new Promise((r) => setTimeout(r, 2000));
+    setBtnState('success');
+    showToast('🎉 تم تسجيل الدخول بنجاح!', 'success', 4000);
+    onSuccess?.(email);
+
+    setTimeout(() => setBtnState('idle'), 2500);
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
   };
 
   /* ── Ripple effect (DOM mutation is fine here) */
   const handleRipple = (e) => {
+<<<<<<< HEAD
     const btn = btnRef.current;
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height) * 2;
+=======
+    const btn  = btnRef.current;
+    if (!btn) return;
+    const rect   = btn.getBoundingClientRect();
+    const size   = Math.max(rect.width, rect.height) * 2;
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
     const ripple = document.createElement('span');
     ripple.style.cssText = `
       position:absolute; border-radius:50%;
       width:${size}px; height:${size}px;
       left:${e.clientX - rect.left - size / 2}px;
+<<<<<<< HEAD
       top:${e.clientY - rect.top - size / 2}px;
+=======
+      top:${e.clientY  - rect.top  - size / 2}px;
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
       background:rgba(255,255,255,0.25);
       transform:scale(0);
       animation:rippleOut 0.6s ease forwards;
@@ -188,7 +232,11 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
         <button
           type="button"
           className="forgot-link"
+<<<<<<< HEAD
           onClick={() => onForgotPassword?.()}
+=======
+          onClick={() => showToast('تم إرسال رابط الاستعادة إلى بريدك', 'success')}
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
         >
           نسيت كلمة المرور؟
         </button>
@@ -282,4 +330,8 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
       </div>
     </form>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d14135193f8bdfbf9d411d727425e4cebc269006
