@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import IndicatorsTab from '../components/IndicatorsTab';
+import MedicationSearchTab from '../components/MedicationSearchTab';
 import './DashboardPage.css';
 
 const VITALS = [
@@ -183,9 +185,10 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
   const greeting = hour < 12 ? 'صباح الخير' : hour < 18 ? 'مساء الخير' : 'مساء النور';
 
   const TABS = [
-    { id: 'overview', label: 'نظرة عامة',  icon: 'dashboard' },
-    { id: 'vitals',   label: 'المؤشرات',   icon: 'vital_signs' },
-    { id: 'schedule', label: 'الجدول',      icon: 'calendar_month' },
+    { id: 'overview',     label: 'نظرة عامة',     icon: 'dashboard' },
+    { id: 'vitals',       label: 'المؤشرات',       icon: 'vital_signs' },
+    { id: 'medications',  label: 'البحث عن دواء',  icon: 'manage_search' },
+    { id: 'schedule',     label: 'الجدول',         icon: 'calendar_month' },
   ];
 
   return (
@@ -238,7 +241,23 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
 
       {/* ══ MAIN ════════════════════════════════ */}
       <main className="dash-main">
+        {activeTab === 'vitals' && (
+          <IndicatorsTab userEmail={userEmail} />
+        )}
 
+        {activeTab === 'medications' && (
+          <MedicationSearchTab />
+        )}
+
+        {activeTab === 'schedule' && (
+          <div className="section-card dash-placeholder">
+            <span className="material-symbols-outlined">calendar_month</span>
+            <h2>الجدول</h2>
+            <p>سيتم عرض جدول الجرعات هنا قريباً.</p>
+          </div>
+        )}
+
+        {activeTab === 'overview' && (<>
         {/* ── Greeting bar ─────────────────── */}
         <div className="dash-greeting">
           <div>
@@ -247,7 +266,7 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
               لديك <strong>{tasks.length - doneTasks}</strong> مهام متبقية اليوم
             </p>
           </div>
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setActiveTab('vitals')}>
             <span className="material-symbols-outlined">add_circle</span>
             تسجيل قراءة جديدة
           </button>
@@ -357,6 +376,7 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
 
           </div>
         </div>
+        </>)}
       </main>
     </div>
   );
