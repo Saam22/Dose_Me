@@ -7,18 +7,24 @@ import './LoginForm.css';
 function validateLoginCredentials(email, password) {
   try {
     const users = JSON.parse(localStorage.getItem('doseme-users') || '{}');
+    const key = (email || '').trim().toLowerCase();
+
+    // ✅ البحث عن المستخدم بدون حساسية لحالة الأحرف أو المسافات
+    const userKey = Object.keys(users).find(
+      (k) => k.trim().toLowerCase() === key
+    );
 
     // ✅ التحقق من وجود المستخدم
-    if (!users[email]) {
+    if (!userKey) {
       return { success: false, error: 'البريد الإلكتروني غير مسجل في النظام' };
     }
 
-    // ✅ التحقق من كلمة المرور
-    if (users[email].pass !== password) {
+    // ✅ التحقق من كلمة المرور (بدون فرض حد أدنى هنا — ده شرط التسجيل فقط)
+    if (users[userKey].pass !== password) {
       return { success: false, error: 'كلمة المرور غير صحيحة' };
     }
 
-    return { success: true, user: users[email] };
+    return { success: true, user: users[userKey] };
   } catch {
     return { success: false, error: 'حدث خطأ في تسجيل الدخول' };
   }
@@ -44,7 +50,7 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
 
   /* ── Validation helpers ────────────────────── */
   const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-  const validatePass = (v) => v.length >= 6;
+  const validatePass = (v) => v.trim().length > 0;
 
   /* ── Input handlers ────────────────────────── */
   const handleEmailChange = (e) => {
@@ -87,7 +93,6 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
     if (!result.success) {
       setBtnState('idle');
       showToast(result.error, 'error', 4000);
-      setPassError(true);
       return;
     }
 
@@ -179,7 +184,7 @@ export default function LoginForm({ onSuccess, showToast, onSignUpClick, onForgo
           </button>
         </div>
         <p className={`error-msg ${passError ? 'show' : ''}`}>
-          كلمة المرور يجب أن تكون 6 أحرف على الأقل
+          الرجاء إدخال كلمة المرور
         </p>
       </div>
 
