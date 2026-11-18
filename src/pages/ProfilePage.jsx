@@ -54,7 +54,7 @@ function Section({ icon, title, color = 'blue', children, collapsible = false })
   );
 }
 
-export default function ProfilePage({ user = {}, onBack, onLogout, isDark, onThemeToggle }) {
+export default function ProfilePage({ user = {}, onBack, onLogout, isDark, onThemeToggle, onOpenSettings }) {
   const fullName  = user.fullName  || 'المستخدم';
   const email     = user.email     || '';
   const phone     = user.phone     || '';
@@ -88,7 +88,7 @@ export default function ProfilePage({ user = {}, onBack, onLogout, isDark, onThe
           <button className="profile-icon-btn" aria-label="الإشعارات">
             <span className="material-symbols-outlined">notifications</span>
           </button>
-          <button className="profile-icon-btn" aria-label="الإعدادات">
+          <button className="profile-icon-btn" aria-label="الإعدادات" onClick={onOpenSettings}>
             <span className="material-symbols-outlined">settings</span>
           </button>
         </div>

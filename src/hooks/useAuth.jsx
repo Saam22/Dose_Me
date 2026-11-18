@@ -1,8 +1,27 @@
 // src/hooks/useAuth.js
 import { useState, useEffect } from 'react';
 
-const USERS_KEY = 'doseme_users';
+const USERS_KEY = 'doseme-users';
 const CURRENT_USER_KEY = 'doseme_current_user';
+
+function normalizeEmail(value) {
+  return (value || '').toString().trim().toLowerCase();
+}
+
+function findUser(users, email) {
+  const key = normalizeEmail(email);
+  const match = Object.keys(users).find((k) => normalizeEmail(k) === key);
+  return match ? users[match] : null;
+}
+
+function readUsers() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -20,22 +39,22 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
-  // Sign Up - يحفظ كل بيانات المستخدم
+  // Sign Up - يحفظ كل بيانات المستخدم بنفس صيغة التطبيق (مفتاح pass)
   const signup = (profileData) => {
     try {
-      const existingUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-      
-      // Check if email exists
-      if (existingUsers[profileData.email]) {
+      const existingUsers = readUsers();
+
+      if (findUser(existingUsers, profileData.email)) {
         return { success: false, error: 'البريد الإلكتروني مسجل بالفعل' };
       }
-      
-      // Create full user object with all signup data
+
       const newUser = {
-        email: profileData.email,
-        password: profileData.password,
+        pass: profileData.password,
+        name: profileData.fullName,
         fullName: profileData.fullName,
+        email: profileData.email,
         phone: profileData.phone,
+        role: profileData.role || 'patient',
         age: profileData.age,
         height: profileData.height,
         weight: profileData.weight,
@@ -46,21 +65,20 @@ export function useAuth() {
         notes: profileData.notes || '',
         createdAt: new Date().toISOString(),
       };
-      
+
       existingUsers[profileData.email] = newUser;
       localStorage.setItem(USERS_KEY, JSON.stringify(existingUsers));
-      
-      // Auto login after signup
-      const loggedUser = { 
-        email: newUser.email, 
+
+      const loggedUser = {
+        email: newUser.email,
         name: newUser.fullName,
-        fullData: newUser 
+        fullData: newUser,
       };
       setUser(loggedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(loggedUser));
-      
+
       return { success: true };
-    } catch (e) {
+    } catch {
       return { success: false, error: 'حدث خطأ، حاول مرة أخرى' };
     }
   };
@@ -68,27 +86,28 @@ export function useAuth() {
   // Sign In - يتحقق من البريد وكلمة المرور
   const signin = (email, password) => {
     try {
-      const existingUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-      const userRecord = existingUsers[email];
-      
+      const existingUsers = readUsers();
+      const userRecord = findUser(existingUsers, email);
+
       if (!userRecord) {
         return { success: false, error: 'البريد الإلكتروني غير مسجل' };
       }
-      
-      if (userRecord.password !== password) {
+
+      const storedPassword = userRecord.pass ?? userRecord.password;
+      if (storedPassword !== password) {
         return { success: false, error: 'كلمة المرور غير صحيحة' };
       }
-      
-      const loggedUser = { 
-        email: userRecord.email, 
-        name: userRecord.fullName,
-        fullData: userRecord 
+
+      const loggedUser = {
+        email: userRecord.email,
+        name: userRecord.fullName || userRecord.name,
+        fullData: userRecord,
       };
       setUser(loggedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(loggedUser));
-      
+
       return { success: true };
-    } catch (e) {
+    } catch {
       return { success: false, error: 'حدث خطأ، حاول مرة أخرى' };
     }
   };

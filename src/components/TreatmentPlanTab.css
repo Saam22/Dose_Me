@@ -1,0 +1,227 @@
+/* src/components/TreatmentPlanTab.css */
+.treatment-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Header ─────────────────────────────────── */
+.treatment-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.treatment-page__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.treatment-page__title .material-symbols-outlined {
+  font-size: 26px;
+  color: var(--cyan-glow);
+}
+.treatment-page__sub {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+.treatment-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cyan-glow);
+  background: rgba(0, 153, 204, 0.1);
+  border: 1px solid rgba(0, 153, 204, 0.22);
+  white-space: nowrap;
+}
+.treatment-progress-pill .material-symbols-outlined { font-size: 17px; }
+
+/* ── Plan card ──────────────────────────────── */
+.treatment-plan-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--panel-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+.treatment-plan-card__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+}
+.treatment-plan-card__item--wide { grid-column: 1 / -1; }
+.treatment-plan-card__item > .material-symbols-outlined {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--cyan-glow);
+  background: rgba(0, 153, 204, 0.1);
+  flex-shrink: 0;
+}
+.treatment-plan-card__item div { display: flex; flex-direction: column; gap: 2px; }
+.treatment-plan-card__item small { font-size: 11px; color: var(--text-muted); }
+.treatment-plan-card__item strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* ── Grid ───────────────────────────────────── */
+.treatment-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── Checklist ──────────────────────────────── */
+.treatment-checklist__actions { display: flex; align-items: center; gap: 8px; }
+.treatment-reset {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+.treatment-reset:hover { color: var(--error); background: var(--glass-fill); }
+
+.treatment-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+}
+.treatment-progress__track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--glass-strong);
+  overflow: hidden;
+}
+.treatment-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0066ff, #00c2ff);
+  transition: width 0.35s ease;
+}
+.treatment-progress > span {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--cyan-glow);
+  min-width: 38px;
+  text-align: left;
+}
+
+.treatment-checklist { display: flex; flex-direction: column; gap: 8px; }
+.treatment-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 11px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.treatment-check:hover { border-color: rgba(0, 153, 204, 0.35); }
+.treatment-check input { position: absolute; opacity: 0; pointer-events: none; }
+.treatment-check__box {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--glass-border);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.treatment-check__box .material-symbols-outlined {
+  font-size: 15px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.2s;
+}
+.treatment-check__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.treatment-check.is-done {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+.treatment-check.is-done .treatment-check__box {
+  background: #10b981;
+  border-color: #10b981;
+}
+.treatment-check.is-done .treatment-check__box .material-symbols-outlined {
+  opacity: 1;
+  transform: scale(1);
+}
+.treatment-check.is-done .treatment-check__text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* ── Tips ───────────────────────────────────── */
+.treatment-tips {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.treatment-tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+}
+.treatment-tips li .material-symbols-outlined {
+  font-size: 18px;
+  color: #10b981;
+  flex-shrink: 0;
+}
+.treatment-tips li p {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 1000px) {
+  .treatment-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .treatment-plan-card { grid-template-columns: 1fr; }
+  .treatment-page__title { font-size: 20px; }
+}

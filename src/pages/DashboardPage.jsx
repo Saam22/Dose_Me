@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import IndicatorsTab from '../components/IndicatorsTab';
 import MedicationSearchTab from '../components/MedicationSearchTab';
+import PatientFileTab from '../components/PatientFileTab';
 import RecoveryPlanTab from '../components/RecoveryPlanTab';
+import ReportsTab from '../components/ReportsTab';
+import SymptomCheckerTab from '../components/SymptomCheckerTab';
+import TreatmentPlanTab from '../components/TreatmentPlanTab';
 import './DashboardPage.css';
 
 const VITALS = [
@@ -188,7 +192,11 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
   const TABS = [
     { id: 'overview',     label: 'نظرة عامة',     icon: 'dashboard' },
     { id: 'vitals',       label: 'المؤشرات',       icon: 'vital_signs' },
+    { id: 'treatment',    label: 'الخطة العلاجية', icon: 'assignment' },
     { id: 'recovery',     label: 'خطة التعافي',   icon: 'healing' },
+    { id: 'reports',      label: 'التقارير',       icon: 'description' },
+    { id: 'file',         label: 'ملفي الطبي',    icon: 'folder_shared' },
+    { id: 'symptoms',     label: 'فحص الأعراض',   icon: 'stethoscope' },
     { id: 'medications',  label: 'البحث عن دواء',  icon: 'manage_search' },
     { id: 'schedule',     label: 'الجدول',         icon: 'calendar_month' },
   ];
@@ -247,8 +255,24 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
           <IndicatorsTab userEmail={userEmail} />
         )}
 
+        {activeTab === 'treatment' && (
+          <TreatmentPlanTab userEmail={userEmail} />
+        )}
+
         {activeTab === 'recovery' && (
           <RecoveryPlanTab userEmail={userEmail} />
+        )}
+
+        {activeTab === 'reports' && (
+          <ReportsTab userEmail={userEmail} userFullName={userFullName} />
+        )}
+
+        {activeTab === 'file' && (
+          <PatientFileTab userEmail={userEmail} userFullName={userFullName} />
+        )}
+
+        {activeTab === 'symptoms' && (
+          <SymptomCheckerTab />
         )}
 
         {activeTab === 'medications' && (

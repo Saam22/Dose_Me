@@ -60,8 +60,8 @@ export default function LoginPage({ onSuccess, onSignUpClick ,onForgotPassword }
   const { toast, showToast } = useToast();
 
   /* ── Callbacks for children ────────────────── */
-  const handleLoginSuccess = (email) => {
-    onSuccess?.(email);
+  const handleLoginSuccess = (email, user) => {
+    onSuccess?.(email, user);
     // Replace with real navigation / auth logic
     console.info('Logged in as:', email);
   };

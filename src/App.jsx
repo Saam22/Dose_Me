@@ -2,8 +2,23 @@ import React, { useState, useEffect } from 'react';
 import LoginPage     from './pages/LoginPage';
 import SignUpPage    from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
+import DoctorDashboardPage from './pages/DoctorDashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordFlow from './pages/Forgotpasswordflow';
+
+const DEMO_DOCTOR = {
+  email: 'doctor@doseme.com',
+  password: '123456',
+  fullName: 'د. أحمد محمد',
+  phone: '01000000000',
+  role: 'doctor',
+  specialty: 'أمراض القلب',
+  license: 'EG-12345',
+  clinic: 'عيادة DoseMe',
+  experience: '12',
+  createdAt: '2024-01-01T00:00:00.000Z',
+};
 
 /**
  * App
@@ -21,18 +36,41 @@ export default function App() {
     try { localStorage.setItem('doseme-theme', isDark ? 'dark' : 'light'); } catch {}
   }, [isDark]);
 
+  /* ── Demo doctor account (for testing the doctor portal) ── */
+  useEffect(() => {
+    try {
+      const users = JSON.parse(localStorage.getItem('doseme-users') || '{}');
+      if (!users[DEMO_DOCTOR.email]) {
+        users[DEMO_DOCTOR.email] = {
+          pass: DEMO_DOCTOR.password,
+          name: DEMO_DOCTOR.fullName,
+          fullName: DEMO_DOCTOR.fullName,
+          phone: DEMO_DOCTOR.phone,
+          role: DEMO_DOCTOR.role,
+          specialty: DEMO_DOCTOR.specialty,
+          license: DEMO_DOCTOR.license,
+          clinic: DEMO_DOCTOR.clinic,
+          experience: DEMO_DOCTOR.experience,
+          createdAt: DEMO_DOCTOR.createdAt,
+        };
+        localStorage.setItem('doseme-users', JSON.stringify(users));
+      }
+    } catch {}
+  }, []);
+
   const toggleTheme = () => setIsDark(d => !d);
 
-  /* ── Login success ─────────────────────────── */
-  const handleLogin = (email) => {
-    setUser(prev => ({ ...(prev || {}), email }));
-    setScreen('dashboard');
+  /* ── Login success (email + full user record) ─ */
+  const handleLogin = (email, userData) => {
+    const role = userData?.role || 'patient';
+    setUser({ ...(userData || {}), email, role });
+    setScreen(role === 'doctor' ? 'doctor' : 'dashboard');
   };
 
   /* ── Sign-up success (receives full profile) ── */
   const handleSignUp = (profileData) => {
     setUser(profileData);
-    setScreen('dashboard');
+    setScreen(profileData?.role === 'doctor' ? 'doctor' : 'dashboard');
   };
   if (screen === 'forgot-password') {
     return (
@@ -47,6 +85,15 @@ export default function App() {
     setScreen('login');
   };
 
+  if (screen === 'doctor') {
+    return (
+      <DoctorDashboardPage
+        doctor={user}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
   if (screen === 'profile') {
     return (
       <ProfilePage
@@ -54,6 +101,19 @@ export default function App() {
         isDark={isDark}
         onThemeToggle={toggleTheme}
         onBack={() => setScreen('dashboard')}
+        onOpenSettings={() => setScreen('settings')}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (screen === 'settings') {
+    return (
+      <SettingsPage
+        user={user}
+        isDark={isDark}
+        onThemeToggle={toggleTheme}
+        onBack={() => setScreen('profile')}
         onLogout={handleLogout}
       />
     );

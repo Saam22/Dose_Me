@@ -3,6 +3,7 @@ import Background from '../components/Background';
 import ThemeToggle from '../components/ThemeToggle';
 import Toast from '../components/Toast';
 import { useToast } from '../hooks/useToast';
+import { SPECIALTIES } from '../utils/specialties';
 import './SignUpPage.css';
 // في أعلى الملف بعد import
 // ── حفظ المستخدم في localStorage ──
@@ -10,7 +11,8 @@ import './SignUpPage.css';
 function checkUserExists(email) {
   try {
     const users = JSON.parse(localStorage.getItem('doseme-users') || '{}');
-    return users.hasOwnProperty(email);
+    const key = (email || '').trim().toLowerCase();
+    return Object.keys(users).some(k => k.trim().toLowerCase() === key);
   } catch {
     return false;
   }
@@ -21,13 +23,21 @@ function saveUser(email, password, userData) {
     users[email] = {
       pass: password,
       name: userData.fullName,
+      fullName: userData.fullName,
+      email,
       phone: userData.phone,
+      role: userData.role || 'patient',
       age: userData.age,
       gender: userData.gender,
       height: userData.height,
       weight: userData.weight,
       bloodType: userData.bloodType,
-      chronic: userData.chronic || []
+      chronic: userData.chronic || [],
+      specialty: userData.specialty || '',
+      license: userData.license || '',
+      clinic: userData.clinic || '',
+      experience: userData.experience || '',
+      createdAt: new Date().toISOString(),
     };
     localStorage.setItem('doseme-users', JSON.stringify(users));
     console.log('✅ تم حفظ المستخدم:', email);
@@ -69,10 +79,34 @@ function Step1({ data, onChange, onPwToggle, pwVisible }) {
     <div className="su-step">
       <h2 className="su-title">إنشاء حساب جديد</h2>
       <p className="su-sub">ابدأ رحلتك الصحية معنا اليوم</p>
+      <div className="su-role-grid">
+        <button
+          type="button"
+          className={`su-role-btn ${(data.role || 'patient') === 'patient' ? 'active' : ''}`}
+          onClick={() => onChange('role', 'patient')}
+        >
+          <span className="material-symbols-outlined">person</span>
+          <span className="su-role-btn__text">
+            <strong>مريض</strong>
+            <small>متابعة صحتي وخطة التعافي</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`su-role-btn ${data.role === 'doctor' ? 'active' : ''}`}
+          onClick={() => onChange('role', 'doctor')}
+        >
+          <span className="material-symbols-outlined">stethoscope</span>
+          <span className="su-role-btn__text">
+            <strong>طبيب</strong>
+            <small>لوحة تحكم وقائمة مرضى</small>
+          </span>
+        </button>
+      </div>
       <div className="su-field">
         <label>الاسم الكامل</label>
         <div className="su-iw">
-          <input type="text" placeholder="أدخل اسمك بالكامل"
+          <input type="text" placeholder={data.role === 'doctor' ? 'د. أدخل اسمك بالكامل' : 'أدخل اسمك بالكامل'}
             value={data.fullName} onChange={e => onChange('fullName', e.target.value)} />
           <span className="material-symbols-outlined">person</span>
         </div>
@@ -114,6 +148,57 @@ function Step1({ data, onChange, onPwToggle, pwVisible }) {
 }
 
 function Step2({ data, onChange }) {
+  if (data.role === 'doctor') {
+    return (
+      <div className="su-step">
+        <h2 className="su-title">بيانات الطبيب</h2>
+        <p className="su-sub">أدخل تخصصك وبيانات الترخيص للوصول إلى بوابة الأطباء</p>
+
+        <div className="su-row">
+          <div className="su-field">
+            <label>التخصص</label>
+            <div className="su-iw">
+              <select value={data.specialty || ''} onChange={e => onChange('specialty', e.target.value)}>
+                <option value="">اختر التخصص</option>
+                {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="su-field">
+            <label>سنوات الخبرة</label>
+            <div className="su-iw">
+              <input type="number" min="0" placeholder="10"
+                value={data.experience || ''} onChange={e => onChange('experience', e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <div className="su-field">
+          <label>رقم الترخيص الطبي</label>
+          <div className="su-iw">
+            <input type="text" placeholder="EG-12345" dir="ltr"
+              value={data.license || ''} onChange={e => onChange('license', e.target.value)} />
+            <span className="material-symbols-outlined">badge</span>
+          </div>
+        </div>
+
+        <div className="su-field">
+          <label>العيادة / المستشفى</label>
+          <div className="su-iw">
+            <input type="text" placeholder="اسم العيادة أو المستشفى"
+              value={data.clinic || ''} onChange={e => onChange('clinic', e.target.value)} />
+            <span className="material-symbols-outlined">local_hospital</span>
+          </div>
+        </div>
+
+        <div className="su-privacy">
+          <span className="material-symbols-outlined">verified_user</span>
+          سيتم التحقق من بيانات الترخيص قبل تفعيل بوابة الأطباء
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="su-step">
       <h2 className="su-title">المعلومات الطبية</h2>
@@ -202,6 +287,33 @@ function Step2({ data, onChange }) {
 }
 
 function Step3({ data }) {
+  if (data.role === 'doctor') {
+    return (
+      <div className="su-step su-step--done">
+        <div className="done-avatar">
+          <span className="done-avatar__letter">{(data.fullName || 'د').charAt(0)}</span>
+          <div className="done-check"><span className="material-symbols-outlined">check</span></div>
+        </div>
+        <h2 className="su-title" style={{textAlign:'center'}}>تم إنشاء حساب الطبيب!</h2>
+        <p className="su-sub" style={{textAlign:'center'}}>مرحباً {data.fullName}، بوابة الأطباء جاهزة</p>
+        <div className="done-stats">
+          <div className="done-stat">
+            <span className="material-symbols-outlined">stethoscope</span>
+            <div><div className="done-stat__val done-stat__val--sm">{data.specialty || '—'}</div><div className="done-stat__lbl">التخصص</div></div>
+          </div>
+          <div className="done-stat">
+            <span className="material-symbols-outlined">badge</span>
+            <div><div className="done-stat__val done-stat__val--sm">{data.license || '—'}</div><div className="done-stat__lbl">الترخيص</div></div>
+          </div>
+          <div className="done-stat">
+            <span className="material-symbols-outlined">local_hospital</span>
+            <div><div className="done-stat__val done-stat__val--sm">{data.clinic || '—'}</div><div className="done-stat__lbl">العيادة</div></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const bmi = data.height && data.weight
     ? (Number(data.weight) / Math.pow(Number(data.height) / 100, 2)).toFixed(1) : '—';
   return (
@@ -239,7 +351,9 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
   const { toast, showToast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '', email: '', phone: '', password: '', terms: false,
+    role: 'patient',
     age: '', gender: '', height: '', weight: '', bloodType: '', chronic: [],
+    specialty: '', license: '', clinic: '', experience: '',
   });
 
   useEffect(() => {
@@ -261,8 +375,13 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
       if (!formData.terms) { showToast('الرجاء الموافقة على الشروط والأحكام', 'error'); return false; }
     }
     if (step === 1) {
-      if (!formData.age) { showToast('الرجاء اختيار العمر', 'error'); return false; }
-      if (!formData.bloodType) { showToast('الرجاء اختيار فصيلة الدم', 'error'); return false; }
+      if (formData.role === 'doctor') {
+        if (!formData.specialty) { showToast('الرجاء اختيار التخصص', 'error'); return false; }
+        if (!formData.license.trim()) { showToast('الرجاء إدخال رقم الترخيص الطبي', 'error'); return false; }
+      } else {
+        if (!formData.age) { showToast('الرجاء اختيار العمر', 'error'); return false; }
+        if (!formData.bloodType) { showToast('الرجاء اختيار فصيلة الدم', 'error'); return false; }
+      }
     }
     return true;
   };
@@ -306,7 +425,9 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
             </div>
           </div>
           <StepBar current={step} total={3} />
-          <p className="su-step-lbl">{LABELS[step]}</p>
+          <p className="su-step-lbl">
+            {step === 1 && formData.role === 'doctor' ? 'بيانات العيادة' : LABELS[step]}
+          </p>
           {step === 0 && <Step1 data={formData} onChange={onChange} pwVisible={pwVisible} onPwToggle={() => setPwVisible(v => !v)} />}
           {step === 1 && <Step2 data={formData} onChange={onChange} />}
           {step === 2 && <Step3 data={formData} />}
@@ -314,7 +435,7 @@ export default function SignUpPage({ onSuccess, onLoginClick }) {
             <span className="material-symbols-outlined">arrow_back</span>
             {BTNS[step]}
           </button>
-          {step === 1 && (
+          {step === 1 && formData.role !== 'doctor' && (
             <button className="su-skip" onClick={() => setStep(2)}>تخطي هذه الخطوة حالياً</button>
           )}
           {step === 0 && (

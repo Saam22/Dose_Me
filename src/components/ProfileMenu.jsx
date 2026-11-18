@@ -1,7 +1,7 @@
 // src/components/ProfileMenu.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function ProfileMenu({ user, onLogout, onViewProfile }) {
+export default function ProfileMenu({ user, onLogout, onViewProfile, onSettings }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -43,7 +43,7 @@ export default function ProfileMenu({ user, onLogout, onViewProfile }) {
             <span className="material-symbols-outlined">person</span>
             ملفي الشخصي
           </button>
-          <button className="dropdown-item" onClick={() => {}}>
+          <button className="dropdown-item" onClick={() => { onSettings?.(); setIsOpen(false); }}>
             <span className="material-symbols-outlined">settings</span>
             الإعدادات
           </button>

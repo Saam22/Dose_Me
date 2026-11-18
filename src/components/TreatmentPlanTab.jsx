@@ -1,77 +1,236 @@
 // src/components/TreatmentPlanTab.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import CarePlanSummary from './CarePlanSummary';
+import { formatDate, loadUserProfile } from '../utils/reportData';
+import { loadPatientCarePlan } from '../utils/carePlans';
+import './TreatmentPlanTab.css';
 
-export default function TreatmentPlanTab({ userData }) {
-  const [plan] = useState({
-    doctor: 'د. أحمد محمد',
-    diagnosis: userData?.conditions?.join(', ') || 'ارتفاع ضغط الدم',
-    startDate: '2024-01-15',
-    endDate: '2024-06-15',
-    notes: 'الالتزام بالجرعات المنتظمة وممارسة الرياضة يومياً'
+const STORAGE_PREFIX = 'doseme-treatment:';
+
+const DEFAULT_CHECKLIST = [
+  { id: 1, task: 'قياس ضغط الدم صباحاً', completed: true },
+  { id: 2, task: 'تناول الدواء بعد الإفطار', completed: false },
+  { id: 3, task: 'تسجيل القراءات في التطبيق', completed: true },
+  { id: 4, task: 'ممارسة رياضة المشي ٣٠ دقيقة', completed: false },
+  { id: 5, task: 'تجنب الأطعمة المالحة', completed: false },
+];
+
+const TIPS = [
+  'لا توقف أي دواء أو تغيّر جرعته دون استشارة الطبيب.',
+  'سجّل أي أعراض جديدة أو آثار جانبية فوراً في التطبيق.',
+  'التزم بمواعيد القياس اليومية لمساعدة طبيبك على تقييم حالتك.',
+  'احتفظ بمواعيد المتابعة الدورية ولا تتأخر عنها.',
+];
+
+function loadChecklist(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  } catch {}
+  return DEFAULT_CHECKLIST.map((item) => ({ ...item }));
+}
+
+function planChecklist(storageKey, doctorPlan) {
+  const stored = loadChecklist(storageKey);
+  const planTasks = (doctorPlan?.tasks || []).filter((task) => task.text);
+  if (!planTasks.length) return stored;
+  const doneMap = new Map(stored.map((task) => [String(task.id), Boolean(task.completed)]));
+  return planTasks.map((task, i) => {
+    const id = task.id || `task-${i}`;
+    return {
+      id,
+      task: task.text,
+      frequency: task.frequency || '',
+      completed: doneMap.get(String(id)) || false,
+    };
   });
+}
 
-  const [checklist, setChecklist] = useState([
-    { id: 1, task: 'قياس ضغط الدم صباحاً', completed: true },
-    { id: 2, task: 'تناول الدواء بعد الإفطار', completed: false },
-    { id: 3, task: 'تسجيل القراءات في التطبيق', completed: true },
-    { id: 4, task: 'ممارسة رياضة المشي 30 دقيقة', completed: false },
-    { id: 5, task: 'تجنب الأطعمة المالحة', completed: false },
-  ]);
+function buildPlan(profile) {
+  const conditions = profile?.conditions || profile?.chronic || [];
+  const diagnosis = conditions.length
+    ? conditions.join('، ')
+    : 'ارتفاع ضغط الدم';
+
+  let start = new Date(profile?.createdAt || Date.now());
+  if (Number.isNaN(start.getTime())) start = new Date();
+  const end = new Date(start.getTime());
+  end.setDate(end.getDate() + 90);
+
+  return {
+    doctor: profile?.doctorName || 'د. أحمد محمد',
+    diagnosis,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+    notes: 'الالتزام بالجرعات المنتظمة، وقياس المؤشرات يومياً، وممارسة المشي ٣٠ دقيقة.',
+  };
+}
+
+export default function TreatmentPlanTab({ userEmail = '' }) {
+  const storageKey = `${STORAGE_PREFIX}${userEmail || 'guest'}`;
+  const profile = useMemo(() => loadUserProfile(userEmail), [userEmail]);
+  const doctorPlan = useMemo(() => loadPatientCarePlan(userEmail), [userEmail]);
+  const plan = useMemo(() => (doctorPlan ? {
+    doctor: doctorPlan.doctorName || 'طبيبك المعالج',
+    diagnosis: doctorPlan.diagnosis || '—',
+    startDate: doctorPlan.startDate,
+    endDate: doctorPlan.endDate,
+    notes: doctorPlan.notes || 'لا توجد ملاحظات.',
+  } : buildPlan(profile)), [doctorPlan, profile]);
+
+  const [checklist, setChecklist] = useState(() => planChecklist(storageKey, doctorPlan));
+
+  useEffect(() => {
+    setChecklist(planChecklist(storageKey, doctorPlan));
+  }, [storageKey, doctorPlan]);
+
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify(checklist)); } catch {}
+  }, [checklist, storageKey]);
+
+  const done = checklist.filter((t) => t.completed).length;
+  const progress = checklist.length
+    ? Math.round((done / checklist.length) * 100)
+    : 0;
 
   const toggleTask = (id) => {
-    setChecklist(checklist.map(task => 
+    setChecklist((prev) => prev.map((task) => (
       task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+    )));
   };
 
-  const progress = Math.round((checklist.filter(t => t.completed).length / checklist.length) * 100);
+  const resetChecklist = () => {
+    const planTasks = (doctorPlan?.tasks || []).filter((task) => task.text);
+    if (planTasks.length) {
+      setChecklist(planTasks.map((task, i) => ({
+        id: task.id || `task-${i}`,
+        task: task.text,
+        frequency: task.frequency || '',
+        completed: false,
+      })));
+      return;
+    }
+    setChecklist(DEFAULT_CHECKLIST.map((item) => ({ ...item })));
+  };
 
   return (
-    <div className="treatment-tab">
-      <div className="tab-header">
-        <h2>📋 الخطة العلاجية</h2>
-      </div>
-
-      <div className="plan-card">
-        <div className="plan-info">
-          <div className="info-row">
-            <span className="info-label">👨‍⚕️ الطبيب المعالج:</span>
-            <span className="info-value">{plan.doctor}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">📝 التشخيص:</span>
-            <span className="info-value">{plan.diagnosis}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">📅 فترة العلاج:</span>
-            <span className="info-value">{plan.startDate} → {plan.endDate}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">💡 ملاحظات:</span>
-            <span className="info-value">{plan.notes}</span>
-          </div>
+    <div className="treatment-page">
+      <div className="treatment-page__header">
+        <div>
+          <h2 className="treatment-page__title">
+            <span className="material-symbols-outlined">assignment</span>
+            الخطة العلاجية
+          </h2>
+          <p className="treatment-page__sub">
+            {doctorPlan
+              ? 'خطة رعاية معتمدة من طبيبك مع قائمة المتابعة اليومية'
+              : 'خطتك المعتمدة من الطبيب مع قائمة المتابعة اليومية'}
+          </p>
+        </div>
+        <div className="treatment-progress-pill">
+          <span className="material-symbols-outlined">task_alt</span>
+          {progress}٪ إنجاز اليوم
         </div>
       </div>
 
-      <div className="checklist-section">
-        <div className="checklist-header">
-          <h3>✅ قائمة المتابعة اليومية</h3>
-          <div className="progress-circle">
-            <svg viewBox="0 0 36 36">
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e0e0e0" strokeWidth="3" />
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#4CAF50" strokeWidth="3" strokeDasharray={`${progress}, 100`} />
-              <text x="18" y="20.5" className="progress-text">{progress}%</text>
-            </svg>
+      {/* Plan details */}
+      {doctorPlan ? (
+        <CarePlanSummary plan={doctorPlan} />
+      ) : (
+        <div className="treatment-plan-card">
+          <div className="treatment-plan-card__item">
+            <span className="material-symbols-outlined">stethoscope</span>
+            <div>
+              <small>الطبيب المعالج</small>
+              <strong>{plan.doctor}</strong>
+            </div>
+          </div>
+          <div className="treatment-plan-card__item">
+            <span className="material-symbols-outlined">clinical_notes</span>
+            <div>
+              <small>التشخيص</small>
+              <strong>{plan.diagnosis}</strong>
+            </div>
+          </div>
+          <div className="treatment-plan-card__item">
+            <span className="material-symbols-outlined">calendar_month</span>
+            <div>
+              <small>فترة العلاج</small>
+              <strong>{formatDate(plan.startDate)} — {formatDate(plan.endDate)}</strong>
+            </div>
+          </div>
+          <div className="treatment-plan-card__item treatment-plan-card__item--wide">
+            <span className="material-symbols-outlined">lightbulb</span>
+            <div>
+              <small>ملاحظات الطبيب</small>
+              <strong>{plan.notes}</strong>
+            </div>
           </div>
         </div>
-        
-        <div className="checklist">
-          {checklist.map(task => (
-            <label key={task.id} className={`checklist-item ${task.completed ? 'completed' : ''}`}>
-              <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task.id)} />
-              <span>{task.task}</span>
-            </label>
-          ))}
+      )}
+
+      <div className="treatment-grid">
+        {/* Checklist */}
+        <div className="section-card">
+          <div className="section-card__header">
+            <div className="section-card__title">
+              <span className="material-symbols-outlined">checklist</span>
+              قائمة المتابعة اليومية
+            </div>
+            <div className="treatment-checklist__actions">
+              <span className="section-card__badge">{done} / {checklist.length}</span>
+              <button className="treatment-reset" onClick={resetChecklist}>
+                إعادة ضبط
+              </button>
+            </div>
+          </div>
+
+          <div className="treatment-progress">
+            <div className="treatment-progress__track">
+              <div className="treatment-progress__fill" style={{ width: `${progress}%` }} />
+            </div>
+            <span>{progress}٪</span>
+          </div>
+
+          <div className="treatment-checklist">
+            {checklist.map((task) => (
+              <label
+                key={task.id}
+                className={`treatment-check ${task.completed ? 'is-done' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleTask(task.id)}
+                />
+                <span className="treatment-check__box">
+                  <span className="material-symbols-outlined">check</span>
+                </span>
+                <span className="treatment-check__text">{task.task}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Tips */}
+        <div className="section-card">
+          <div className="section-card__header">
+            <div className="section-card__title">
+              <span className="material-symbols-outlined">health_and_safety</span>
+              تعليمات مهمة
+            </div>
+          </div>
+          <ul className="treatment-tips">
+            {TIPS.map((tip) => (
+              <li key={tip}>
+                <span className="material-symbols-outlined">verified</span>
+                <p>{tip}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
