@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import IndicatorsTab from '../components/IndicatorsTab';
 import MedicationSearchTab from '../components/MedicationSearchTab';
+import RecoveryPlanTab from '../components/RecoveryPlanTab';
 import './DashboardPage.css';
 
 const VITALS = [
@@ -187,6 +188,7 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
   const TABS = [
     { id: 'overview',     label: 'نظرة عامة',     icon: 'dashboard' },
     { id: 'vitals',       label: 'المؤشرات',       icon: 'vital_signs' },
+    { id: 'recovery',     label: 'خطة التعافي',   icon: 'healing' },
     { id: 'medications',  label: 'البحث عن دواء',  icon: 'manage_search' },
     { id: 'schedule',     label: 'الجدول',         icon: 'calendar_month' },
   ];
@@ -243,6 +245,10 @@ export default function DashboardPage({ userEmail = '', userFullName = '', onLog
       <main className="dash-main">
         {activeTab === 'vitals' && (
           <IndicatorsTab userEmail={userEmail} />
+        )}
+
+        {activeTab === 'recovery' && (
+          <RecoveryPlanTab userEmail={userEmail} />
         )}
 
         {activeTab === 'medications' && (

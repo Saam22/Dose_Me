@@ -862,3 +862,19 @@
     min-width: auto;
   }
 }
+
+/* Navbar responsiveness for many tabs */
+@media (max-width: 1100px) {
+  .dash-nav { padding: 0 16px; }
+  .dash-nav__tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+  .dash-nav__tabs::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 768px) {
+  .dash-nav__tab { padding: 7px 10px; }
+  .dash-nav__tab span:last-child { display: none; }
+}
